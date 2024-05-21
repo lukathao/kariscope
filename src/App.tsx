@@ -1,13 +1,52 @@
+import { FormEvent, useState } from "react"
 import { AccountForm } from "./AccountForm"
 import { AddressForm } from "./AddressForm"
 import { UserForm } from "./UserForm"
 import { multistepForm } from "./multistepForm"
 
+type FormData = {
+  firstName: string,
+  lastName: string,
+  age: string,
+  street: string,
+  city: string,
+  state: string,
+  zip: string,
+  email: string,
+  password: string,
+}
+
+const INITIAL_DATA: FormData = {
+  firstName: "",
+  lastName: "",
+  age: "",
+  street: "",
+  city: "",
+  state: "",
+  zip: "",
+  email: "",
+  password: "",
+}
+
 function App() {
+  const [data, setData] = useState(INITIAL_DATA)
+  function updateFields(fields: Partial<FormData>) {
+    setData(prev => {
+      return { ...prev, ...fields}
+    })
+  }
+
   const {currentStepIndex, step, steps, isFirstStep, isLastStep, next, back} = multistepForm([
-  <UserForm />, 
-  <AddressForm />, 
-  <AccountForm />])
+  <UserForm {...data} updateFields={updateFields} />, 
+  <AddressForm {...data} updateFields={updateFields} />, 
+  <AccountForm {...data} updateFields={updateFields} />])
+
+  function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!isLastStep) return next() 
+    alert("Success, TBD post data to API")
+  }
+
   return (
     <div style={{
       position: "relative",
@@ -17,8 +56,9 @@ function App() {
       margin: "1rem",
       borderRadius: ".5rem",
       fontFamily: "Arial",
+      maxWidth: "max-content",
     }}>
-      <form>
+      <form onSubmit={onSubmit}>
         <div style={{
           position: "absolute",
           top: ".5rem",
@@ -34,7 +74,7 @@ function App() {
           justifyContent: "flex-end",
         }}>
           {!isFirstStep && <button type="button" onClick={back}>Back</button>}
-          <button type="button" onClick={next}>
+          <button type="submit">
             {isLastStep ? "Finish" : "Next"}
           </button>
         </div>
